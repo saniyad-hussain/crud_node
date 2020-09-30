@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Home</title>
+	</head>
+	<body>
+		<form action="/addUser" method="POST">
+			<input type="text" name="name" placeholder="name" />
+			<input type="text" name="age" placeholder="Age" />
+			<input type="text" name="country" placeholder="Country" />
+			<button type="submit">Add User</button>
+		</form>
+		<div id="container"></div>
+		<div id="updateUser"></div>
+		<script>
+			function loadUser() {
+				fetch('/users')
+					.then((res) => res.json())
+					.then((users) => {
+						const container = document.getElementById('container');
+						users.forEach((user) => {
+							const p = document.createElement('p');
+							p.innerHTML = `Name: ${user.name} Age: ${user.age} Country: ${user.country} <button onclick="ShowUser('${user._id}')">Update</button> <button onclick="deleteUser('${user._id}')">Delete</button>`;
+							container.appendChild(p);
+						});
+					});
+			}
+			loadUser();
+
+			function deleteUser(id) {
+				fetch(`/delete/${id}`, {
+					method: 'DELETE',
+				})
+					.then((res) => res.json())
+					.then((result) => {
+						console.log('Deleted Successfully');
+					});
+			}
+			function ShowUser(id) {
+				fetch(`/user/${id}`)
+					.then((res) => res.json())
+					.then((data) => {
+						const updateUser = document.getElementById('updateUser');
+						updateUser.innerHTML = `Update User: ${data.name} <br> <input type="text" value="${data.name}" id="name" /> <br> <input type="text" value="${data.age}" id="age" /> <br> <button onclick="updateUser('${data._id}')"> Update </button>`;
+					});
+			}
+
+			function updateUser(id) {
+				const name = document.getElementById('name').value;
+				const age = document.getElementById('age').value;
+				console.log(name, age);
+				const user = { id, name, age };
+				fetch(`/update/${id}`, {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(user),
+				});
+				console.log(JSON.stringify(user));
+			}
+		</script>
+	</body>
+</html>
